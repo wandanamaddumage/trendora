@@ -10,6 +10,7 @@ export interface CartItem {
 }
 
 export interface CartState {
+  [x: string]: any
   items: CartItem[]
 }
 

@@ -13,8 +13,7 @@ import { signOut } from '@/store/slices/auth'
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Products', path: '/products' },
-  { name: 'About', path: '/about' },
-  { name: 'Contact', path: '/contact' },
+  
 ]
 
 export const Navbar = () => {
@@ -26,7 +25,11 @@ export const Navbar = () => {
   const { user, isAuthenticated, isAdmin } = useAppSelector(state => state.auth)
 
   const isActive = useCallback(
-    (path: string) => pathname === path,
+    (path: string) => {
+      // Select Home as active initially if pathname is "/"
+      if (pathname === '/' && path === '/') return true;
+      return pathname === path;
+    },
     [pathname]
   )
 
@@ -126,7 +129,7 @@ export const Navbar = () => {
 
             {/* User */}
             {isAuthenticated ? <UserMenu /> : (
-              <Link href="/login">
+              <Link href="/sign-in">
                 <Button className="bg-blue-600 text-white hover:bg-blue-700">
                   Sign In
                 </Button>
