@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     /**
+     * Register a new customer.
+     * 
      * @OA\Post(
      *     path="/api/auth/register",
      *     tags={"Auth"},
@@ -21,19 +23,25 @@ class AuthController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"first_name","last_name","email","contact","password"},
-     *             @OA\Property(property="first_name", type="string"),
-     *             @OA\Property(property="last_name", type="string"),
-     *             @OA\Property(property="email", type="string", format="email"),
-     *             @OA\Property(property="contact", type="string"),
-     *             @OA\Property(property="password", type="string", format="password")
+     *             required={"first_name","last_name","email","contact","password","password_confirmation"},
+     *             @OA\Property(property="first_name", type="string", example="John"),
+     *             @OA\Property(property="last_name", type="string", example="Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="contact", type="string", example="1234567890"),
+     *             @OA\Property(property="password", type="string", format="password", example="password123"),
+     *             @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Created")
+     *     @OA\Response(
+     *         response=201,
+     *         description="User created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="user", type="object"),
+     *             @OA\Property(property="token", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error")
      * )
-     */
-    /**
-     * Register a new customer.
      */
     public function register(RegisterRequest $request): JsonResponse
     {

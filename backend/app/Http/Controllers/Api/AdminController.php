@@ -21,7 +21,12 @@ class AdminController extends Controller
      *     tags={"Admin"},
      *     summary="List customers",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=200, description="OK")
+     *     @OA\Parameter(name="search", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="is_active", in="query", required=false, @OA\Schema(type="boolean")),
+     *     @OA\Parameter(name="per_page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="OK"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Insufficient permissions")
      * )
      */
     public function customers(Request $request): AnonymousResourceCollection
@@ -126,7 +131,25 @@ class AdminController extends Controller
      *     tags={"Admin"},
      *     summary="Create user",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=201, description="Created")
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"role","first_name","last_name","email","password"},
+     *             @OA\Property(property="role", type="string", enum={"admin","user","customer"}),
+     *             @OA\Property(property="first_name", type="string"),
+     *             @OA\Property(property="last_name", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="contact", type="string"),
+     *             @OA\Property(property="password", type="string", format="password"),
+     *             @OA\Property(property="is_active", type="boolean"),
+     *             @OA\Property(property="can_create_product", type="boolean"),
+     *             @OA\Property(property="can_update_product", type="boolean"),
+     *             @OA\Property(property="can_delete_product", type="boolean")
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Created"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Insufficient permissions")
      * )
      */
     public function createUser(CreateUserRequest $request): JsonResponse
