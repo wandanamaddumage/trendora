@@ -59,6 +59,7 @@ Route::prefix('products')->group(function () {
 // Cart routes (customer auth)
 Route::middleware(['auth:sanctum', 'role:customer'])->prefix('cart')->group(function () {
     Route::get('/', [CartController::class, 'index']);
+    Route::get('/items', [CartController::class, 'items']);
     Route::post('/items', [CartController::class, 'addItem']);
     Route::patch('/items/{id}', [CartController::class, 'updateItem']);
     Route::delete('/items/{id}', [CartController::class, 'removeItem']);

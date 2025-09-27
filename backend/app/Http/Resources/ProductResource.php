@@ -16,15 +16,15 @@ class ProductResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'brand' => $this->brand,
-            'name' => $this->name,
+            'brand' => $this->brand ?? '',
+            'name' => $this->name ?? '',
             'image_url' => $this->image_url,
-            'quantity' => $this->quantity,
-            'cost_price' => $this->cost_price,
-            'sell_price' => $this->sell_price,
-            'description' => $this->description,
-            'rating' => $this->rating,
-            'is_active' => $this->is_active,
+            'quantity' => $this->quantity ?? 0,
+            'cost_price' => $this->cost_price ? (string) $this->cost_price : '0.00',
+            'sell_price' => $this->sell_price ? (string) $this->sell_price : '0.00',
+            'description' => $this->description ?? '',
+            'rating' => $this->rating ?? 0,
+            'is_active' => $this->is_active ?? false,
             'created_by' => $this->whenLoaded('creator', function () {
                 return [
                     'id' => $this->creator->id,
@@ -37,8 +37,8 @@ class ProductResource extends JsonResource
                     'name' => $this->updater->first_name . ' ' . $this->updater->last_name,
                 ];
             }),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }

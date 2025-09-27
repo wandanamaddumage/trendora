@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Cart\AddItemRequest;
 use App\Http\Requests\Cart\UpdateItemRequest;
 use App\Http\Resources\CartResource;
+use App\Http\Resources\CartItemResource;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Services\CartService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class CartController extends Controller
 {
@@ -35,12 +37,38 @@ class CartController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/cart/items",
+     *     tags={"Cart"},
+     *     summary="Get cart items",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="OK")
+     * )
+     */
+    public function items(): AnonymousResourceCollection
+    {
+        $cart = $this->cartService->getOrCreateCart(auth()->user());
+        
+        return CartItemResource::collection($cart->items);
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/cart/items",
      *     tags={"Cart"},
      *     summary="Add item",
      *     security={{"bearerAuth":{}}},
-     *     @OA\Response(response=201, description="Created")
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"product_id","quantity"},
+     *             @OA\Property(property="product_id", type="integer", example=1),
+     *             @OA\Property(property="quantity", type="integer", example=2)
+     *         )
+     *     ),
+     *     @OA\Response(response=201, description="Created"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Insufficient permissions")
      * )
      */
     public function addItem(AddItemRequest $request): JsonResponse
@@ -62,7 +90,16 @@ class CartController extends Controller
      *     summary="Update item",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *     @OA\Response(response=200, description="OK")
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"quantity"},
+     *             @OA\Property(property="quantity", type="integer", example=3)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="OK"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=403, description="Insufficient permissions")
      * )
      */
     public function updateItem(UpdateItemRequest $request, CartItem $cartItem): JsonResponse
