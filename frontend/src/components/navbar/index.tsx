@@ -105,15 +105,7 @@ export const Navbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
-            {/* Theme Toggle */}
-            <ModeToggle />
-
-            {/* Search */}
-            <Link href="/search">
-              <Button variant="ghost" className="p-2">
-                <Search size={20} />
-              </Button>
-            </Link>
+          
 
             {/* Cart */}
             <Link href="/cart" className="relative">
@@ -126,6 +118,9 @@ export const Navbar = () => {
                 )}
               </Button>
             </Link>
+
+            {/* Theme Toggle */}
+            <ModeToggle />
 
             {/* User */}
             {isAuthenticated ? <UserMenu /> : (
