@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useAuth } from '@/hooks/useAuth'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { signInAsync } from '@/store/slices/auth'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import InputText from '@/components/input-fields/input-text'
@@ -13,7 +14,8 @@ import { LoginFormValues, loginSchema } from './schema'
 
 const SignInForm = () => {
   const router = useRouter()
-  const { isAuthenticated, signIn, loading } = useAuth()
+  const dispatch = useAppDispatch()
+  const { isAuthenticated, loading } = useAppSelector(state => state.auth)
   const [showPassword, setShowPassword] = useState(false)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
@@ -36,10 +38,14 @@ const SignInForm = () => {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoggingIn(true)
     try {
-      await signIn(data.email, data.password)
-      toast.success('Welcome to Trendora!')
-      router.push('/')
-      reset()
+      const result = await dispatch(signInAsync({ email: data.email, password: data.password }))
+      if (signInAsync.fulfilled.match(result)) {
+        toast.success('Welcome to Trendora!')
+        router.push('/')
+        reset()
+      } else {
+        toast.error('Login failed. Please try again.')
+      }
     } catch {
       toast.error('Login failed. Please try again.')
     } finally {
