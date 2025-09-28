@@ -62,7 +62,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 dark:border-gray-700 shadow-md rounded-lg max-w-sm overflow-hidden transition hover:shadow-lg">
+      <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border-5 border-blue-900 shadow-2xl rounded-3xl max-w-sm overflow-hidden transition hover:shadow-lg">
         {/* Product Image */}
         <div className="relative group">
           <img

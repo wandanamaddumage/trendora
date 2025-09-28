@@ -63,5 +63,4 @@ const authSlice = createSlice({
 })
 
 export const { signOut } = authSlice.actions
-// Remove this line: export { signInAsync }  
 export default authSlice.reducer
