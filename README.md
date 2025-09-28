@@ -23,7 +23,7 @@ Modern e-commerce monorepo with a Laravel API backend and a Next.js (App Router)
 
 ## Tech Stack
 - **Frontend**: Next.js (App Router), TypeScript, RTK Query, Redux Persist, TailwindCSS, shadcn/ui, Zod
-- **Backend**: Laravel (API), PHP, MySQL/PostgreSQL (configure via `.env`), Sanctum/JWT
+- **Backend**: Laravel (API), PHP, MySQL (configure via `.env`), Sanctum/JWT
 - **Tooling**: OpenAPI (Swagger), ESLint, Prettier
 
 ## Monorepo Structure
