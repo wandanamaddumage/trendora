@@ -1,14 +1,16 @@
+"use client"
 
 import { useState } from 'react'
 import {Plus, Search, Filter, Edit, Trash2, Eye, EyeOff} from 'lucide-react'
-import { useProductCRUD } from '../hooks/useProductCRUD'
-import { useAuth } from '../hooks/useAuth'
+import { useProductCRUD } from '@/app/(dashboard)/hooks/useProductCRUD'
+import { useAuth } from '@/app/(dashboard)/hooks/useAuth'
 import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import ProductForm from './components/ProductForm'
+import { formatCurrency, formatDate } from '@/lib/utils'
 
 interface Product {
   _id?: string
@@ -96,8 +98,8 @@ export default function Products() {
   }
 
   // Get unique brands and categories for filter dropdowns
-  const uniqueBrands = [...new Set(products.map(p => p.brand))].filter(Boolean)
-  const uniqueCategories = [...new Set(products.map(p => p.category))].filter(Boolean)
+  const uniqueBrands: string[] = [...new Set(products.map((p: any) => p.brand))].filter(Boolean) as string[]
+  const uniqueCategories: string[] = [...new Set(products.map((p: any) => p.category))].filter(Boolean) as string[]
 
   return (
     <div className="space-y-6">
@@ -220,7 +222,7 @@ export default function Products() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => (
+                {products.map((product: Product) => (
                   <TableRow key={product._id}>
                     <TableCell>
                       {product.imageUrl ? (

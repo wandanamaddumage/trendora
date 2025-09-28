@@ -16,7 +16,7 @@ const FooterLinkGroup = ({ title, links }: { title: string; links: { label: stri
     <h3 className="text-lg font-semibold">{title}</h3>
     <ul className="space-y-2">
       {links.map((link) => (
-        <li key={link.href}>
+        <li key={`${title}-${link.href}-${link.label}`}>
           <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
             {link.label}
           </Link>

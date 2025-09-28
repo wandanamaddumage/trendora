@@ -1,6 +1,7 @@
 'use client'
 
-import ProductCard, { Product } from "@/components/product-card"
+import ProductCard from "@/components/product-card"
+import type { Product } from "@/types/product"
 
 interface Props {
   products: Product[]
@@ -43,7 +44,7 @@ export default function ProductGrid({ products, loading, viewMode, clearFilters 
       }`}
     >
       {products.map((product) => (
-        <ProductCard key={product._id} product={product} />
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   )

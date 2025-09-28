@@ -1,46 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import ProductCard from '@/components/product-card'
-
-export interface Product {
-  _id: string
-  name: string
-  brand: string
-  sellPrice: number
-  imageUrl?: string
-  rating: number
-  category: string
-  isActive: boolean
-  quantity: number
-}
-
-// Mock fetch function (replace with your API)
-const fetchFeaturedProducts = async (): Promise<Product[]> => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve([
-        { _id: '1', name: 'Laptop', brand: 'Dell', sellPrice: 1200, rating: 4.5, category: 'Electronics', isActive: true, quantity: 10 },
-        { _id: '2', name: 'Shirt', brand: 'Nike', sellPrice: 45, rating: 4.8, category: 'Clothing', isActive: true, quantity: 20 },
-        { _id: '3', name: 'Book', brand: 'Penguin', sellPrice: 20, rating: 4.9, category: 'Books', isActive: true, quantity: 50 }
-      ])
-    }, 1000)
-  })
-}
+import { useGetProductsQuery } from '@/store/api/splits/products'
 
 const FeaturedProductsSection = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchFeaturedProducts().then(products => {
-      setFeaturedProducts(products)
-      setLoading(false)
-    })
-  }, [])
+  const { data, isLoading } = useGetProductsQuery({ per_page: 6, sort: 'created_at', sort_direction: 'desc' } as any)
+  const featuredProducts = useMemo(() => data?.data ?? [], [data])
 
   return (
     <section className="py-16 bg-white dark:bg-gray-800">
@@ -50,14 +19,14 @@ const FeaturedProductsSection = () => {
           <p className="text-xl text-gray-600 dark:text-gray-400">Discover our top-rated and trending products</p>
         </motion.div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => <div key={i} className="bg-gray-200 dark:bg-gray-700 rounded-xl h-80 animate-pulse"></div>)}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProducts.map((product, index) => (
-              <motion.div key={product._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>
+              <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: index * 0.1 }}>
                 <ProductCard product={product} />
               </motion.div>
             ))}

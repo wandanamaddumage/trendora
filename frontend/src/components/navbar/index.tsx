@@ -81,7 +81,7 @@ export const Navbar = () => {
 
           {isAdmin && (
             <Link
-              href="/admin"
+              href="/dashboard"
               className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Admin Dashboard
@@ -191,7 +191,7 @@ export const Navbar = () => {
                     </Link>
                     {isAdmin && (
                       <Link
-                        href="/admin"
+                        href="/dashboard"
                         className="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                         onClick={() => setIsMenuOpen(false)}
                       >

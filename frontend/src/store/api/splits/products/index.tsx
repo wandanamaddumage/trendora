@@ -53,6 +53,7 @@ export const productsApi = baseApi.injectEndpoints({
         url: `${Endpoints.Products}/${id}`,
         method: "GET",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       providesTags: (_result, _err, id) => [{ type: "Products", id }],
     }),
 
@@ -62,6 +63,7 @@ export const productsApi = baseApi.injectEndpoints({
         method: "POST",
         body: productData,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Products"],
     }),
 
@@ -71,6 +73,7 @@ export const productsApi = baseApi.injectEndpoints({
         method: "PUT",
         body: productData,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: (_result, _err, { id }) => [{ type: "Products", id }],
     }),
 
@@ -87,6 +90,7 @@ export const productsApi = baseApi.injectEndpoints({
         url: `${Endpoints.Products}/${id}/toggle-active`,
         method: "PATCH",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: (_result, _err, id) => [{ type: "Products", id }],
     }),
   }),
