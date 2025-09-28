@@ -1,11 +1,13 @@
 export interface Product {
-  _id: string
+  id: number
   name: string
   brand: string
-  sellPrice: number
-  imageUrl?: string
-  rating: number
+  price: number
+  image_url?: string
   category: string
-  isActive: boolean
-  quantity: number
+  is_active: boolean
+  stock_quantity: number
+  description: string
+  created_at: string
+  updated_at: string
 }

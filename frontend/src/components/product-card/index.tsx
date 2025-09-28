@@ -2,55 +2,49 @@
 
 import { Star, ShoppingCart, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useDispatch } from 'react-redux'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { addItem } from '@/store/slices/cart/index'
+import { useAddCartItemMutation } from '@/store/api/splits/cart'
+import { useAppSelector } from '@/store/hooks'
 import ProductQuickViewModal from '../quick-view-modal'
 
-export interface Product {
-  _id: string
-  name: string
-  brand: string
-  sellPrice: number
-  imageUrl?: string
-  rating: number
-  category: string
-  isActive: boolean
-  quantity: number
-}
+import { Product } from '@/types/product'
 
 interface ProductCardProps {
   product: Product
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const dispatch = useDispatch()
   const [quickViewOpen, setQuickViewOpen] = useState(false)
+  const [addToCart, { isLoading }] = useAddCartItemMutation()
+  const { isAuthenticated, user } = useAppSelector(state => state.auth)
 
-  const handleAddToCart = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAddToCart = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.stopPropagation()
 
-    if (!product.isActive || product.quantity === 0) {
+    if (!isAuthenticated || user?.role !== 'customer') {
+      toast.error('Please sign in as a customer to add items to cart')
+      return
+    }
+
+    if (!product.is_active || product.stock_quantity === 0) {
       toast.error('Product is out of stock')
       return
     }
 
-    dispatch(
-      addItem({
-        id: product._id,
-        name: product.name,
-        price: product.sellPrice,
-        brand: product.brand,
-        image: product.imageUrl,
-      })
-    )
-
-    toast.success('Added to cart!')
+    try {
+      await addToCart({
+        product_id: product.id,
+        quantity: 1,
+      }).unwrap()
+      toast.success('Added to cart!')
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Failed to add to cart')
+    }
   }
 
-  const renderStars = (rating: number) =>
+  const renderStars = (rating: number = 4.5) =>
     Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
@@ -66,7 +60,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Product Image */}
         <div className="relative group">
           <img
-            src={product.imageUrl || 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg'}
+            src={product.image_url || 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg'}
             alt={product.name}
             className="w-full h-56 object-cover p-4 rounded-t-lg"
           />
@@ -86,7 +80,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </Button>
             <Button
               onClick={handleAddToCart}
-              disabled={!product.isActive || product.quantity === 0}
+              disabled={!product.is_active || product.stock_quantity === 0 || isLoading}
               size="sm"
               className="rounded-lg flex items-center gap-1"
             >
@@ -106,20 +100,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           {/* Rating */}
           <div className="flex items-center mt-2.5 mb-4">
-            {renderStars(product.rating)}
+            {renderStars(4.5)}
             <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded ml-2 dark:bg-blue-200 dark:text-blue-800">
-              {product.rating.toFixed(1)}
+              4.5
             </span>
           </div>
 
           {/* Price + Cart */}
           <div className="flex items-center justify-between">
             <span className="text-2xl font-bold text-gray-900 dark:text-white">
-              ${product.sellPrice}
+              ${product.price}
             </span>
             <Button
               onClick={handleAddToCart}
-              disabled={!product.isActive || product.quantity === 0}
+              disabled={!product.is_active || product.stock_quantity === 0 || isLoading}
               size="sm"
               className="rounded-lg"
             >
