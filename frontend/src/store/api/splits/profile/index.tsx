@@ -16,10 +16,8 @@ export interface Profile {
 export interface UpdateProfileRequest {
   first_name?: string
   last_name?: string
+  email?: string
   contact?: string
-  address?: string
-  date_of_birth?: string
-  profile_image?: string
   password?: string
 }
 

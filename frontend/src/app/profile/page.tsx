@@ -16,8 +16,6 @@ const profileSchema = z.object({
   last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email(),
   contact: z.string().optional(),
-  address: z.string().optional(),
-  date_of_birth: z.string().optional(),
   password: z.string().optional(),
 })
 
@@ -38,8 +36,6 @@ export default function ProfilePage() {
         last_name: profile.last_name || '',
         email: profile.email || '',
         contact: profile.contact || '',
-        address: profile.address || '',
-        date_of_birth: profile.date_of_birth || '',
         password: '',
       })
     }
@@ -47,8 +43,16 @@ export default function ProfilePage() {
 
   const onSubmit = async (data: ProfileForm) => {
     try {
-      const { email, ...updatable } = data // email usually not editable here
-      const res = await updateProfile(updatable).unwrap()
+      const payload: any = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        contact: data.contact || undefined,
+      }
+      if (data.password && data.password.trim().length > 0) {
+        payload.password = data.password.trim()
+      }
+      await updateProfile(payload).unwrap()
       toast.success('Profile updated successfully')
       reset({ ...data, password: '' })
     } catch (e: any) {
@@ -60,7 +64,7 @@ export default function ProfilePage() {
 
   return (
     <AuthGuard requireAuth>
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-3xl mx-auto p-10">
         <Card>
           <CardHeader>
             <CardTitle>My Profile</CardTitle>
@@ -92,16 +96,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">Address</label>
-                  <Input {...register('address')} placeholder="Address" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium">Date of Birth</label>
-                  <Input type="date" {...register('date_of_birth')} />
-                </div>
-              </div>
+              {/* Address and Date of Birth removed per backend contract */}
 
               <div>
                 <label className="text-sm font-medium">New Password (optional)</label>
