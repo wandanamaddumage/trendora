@@ -39,7 +39,7 @@ trendora/
 - Node.js 18+
 - npm or pnpm/yarn
 - PHP 8.2+ and Composer
-- MySQL/PostgreSQL (or compatible DB)
+- MySQL (or compatible DB)
 
 ## Backend Setup (Laravel)
 1. Copy env and configure DB/app keys:
@@ -66,25 +66,6 @@ trendora/
 5. Authentication
    - Using Sanctum/JWT. Ensure CORS and cookie/domain settings align with your frontend origin if using cookies.
 
-### Important Backend Notes
-- Ensure role middleware is registered in `app/Http/Kernel.php`:
-  ```php
-  'role' => \App\Http\Middleware\RoleMiddleware::class,
-  ```
-- Controllers should return Laravel-style JSON with `{ data: ... }` for resources and `{ data: [...], meta: {...} }` for paginated lists.
-- Expected product payload (snake_case):
-  ```json
-  {
-    "name": "Air Max 1",
-    "description": "...",
-    "price": 199.99,
-    "cost_price": 120.00,
-    "brand": "Nike",
-    "category": "Shoes",
-    "stock_quantity": 40,
-    "is_active": true
-  }
-  ```
 
 ## Frontend Setup (Next.js)
 1. Create env file and point to your API:
