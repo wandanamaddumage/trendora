@@ -122,4 +122,4 @@ trendora/
 - ![Profile](docs/images/profile.png.png)
 - ![Sign In](docs/images/sign-in.png)
 - ![Sign Up](docs/images/sign-up.png)
-- ![Dark Mood](docs/images/dark-moode.png)
+- ![Dark Mood](docs/images/dark-mood.png)
