@@ -3,6 +3,7 @@
 import Sidebar from '@/components/sidenav-bar'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import AuthGuard from '@/components/auth/auth-guard'
 
 const user = {
   firstName: 'John',
@@ -22,8 +23,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen">
-      <Sidebar role={user.role as 'admin' | 'staff'} onClose={() => {}} />
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <Sidebar onClose={() => {}} />
+      <AuthGuard requireAuth requireStaff>
+        <main className="flex-1 overflow-y-auto p-10">{children}</main>
+      </AuthGuard>
     </div>
   )
 }

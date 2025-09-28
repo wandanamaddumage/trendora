@@ -16,10 +16,10 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
-import { useProductCRUD } from '../hooks/useProductCRUD'
-import { useCustomerCRUD } from '../hooks/useCustomerCRUD'
-import { useUserCRUD } from '../hooks/useUserCRUD'
-import { formatCurrency } from '../lib/utils'
+import { useProductCRUD } from '@/app/(dashboard)/hooks/useProductCRUD'
+import { useCustomerCRUD } from '@/app/(dashboard)/hooks/useCustomerCRUD'
+import { useUserCRUD } from '@/app/(dashboard)/hooks/useUserCRUD'
+import { formatCurrency } from '@/lib/utils'
 
 interface DashboardStats {
   totalProducts: number
@@ -51,18 +51,18 @@ export default function Dashboard() {
   useEffect(() => {
     if (!products.length && !customers.length && !users.length) return
 
-    const activeProducts = products.filter(p => p.isActive)
-    const activeCustomers = customers.filter(c => c.isActive)
-    const activeUsers = users.filter(u => u.isActive)
+    const activeProducts = products.filter((p: any) => p.isActive)
+    const activeCustomers = customers.filter((c: any) => c.isActive)
+    const activeUsers = users.filter((u: any) => u.isActive)
 
     const totalRevenue = products.reduce(
-      (sum, product) => sum + product.sellPrice * product.quantity,
+      (sum: number, product: any) => sum + product.sellPrice * product.quantity,
       0
     )
 
     const averageRating =
       products.length > 0
-        ? products.reduce((sum, p) => sum + (p.rating || 0), 0) /
+        ? products.reduce((sum: number, p: any) => sum + (p.rating || 0), 0) /
           products.length
         : 0
 

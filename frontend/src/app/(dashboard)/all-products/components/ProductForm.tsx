@@ -1,10 +1,13 @@
+"use client"
+
 import { useState, useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Upload, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-import { productSchema, ProductFormData } from '@/schemas/productSchema'
+import { productSchema } from './schema'
+import { z } from 'zod'
 import { useProductCRUD } from '../hooks/useProductCRUD'
 import InputText from '@/components/input-fields/input-text'
 import { Button } from '@/components/ui/button'
@@ -40,8 +43,8 @@ export default function ProductForm({ open, onClose, product, onSuccess }: Produ
 
   const { createProduct, updateProduct, uploadProductImage } = useProductCRUD()
 
-  const methods = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema)
+  const methods = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema) as any,
   })
 
   const { handleSubmit, reset, setValue, formState: { isSubmitting } } = methods
@@ -80,41 +83,49 @@ export default function ProductForm({ open, onClose, product, onSuccess }: Produ
     setImagePreview('')
   }
 
-  const onSubmit = async (data: ProductFormData) => {
+  const onSubmit = async (data: z.infer<typeof productSchema>) => {
     try {
-      let imageUrl = product?.imageUrl || ''
+      // Step 1: Create or update base product fields
+      const basePayload = {
+        ...data,
+        isActive: product?.isActive ?? true,
+        tags: data.tags ? data.tags.split(',').map((tag: string) => tag.trim()) : [],
+      }
 
-      if (imageFile) {
-        setUploading(true)
-        const uploadResult = await uploadProductImage(imageFile)
-        if (uploadResult.success) imageUrl = uploadResult.url!
-        else {
-          toast.error('Failed to upload image')
-          setUploading(false)
+      let workingId = product?._id
+      let op = null as any
+      if (product?._id) {
+        op = await updateProduct(product._id, basePayload)
+        if (!op.success) {
+          toast.error(op.error || 'Failed to update product')
           return
         }
-        setUploading(false)
-      }
-
-      const productData = {
-        ...data,
-        imageUrl,
-        isActive: true,
-        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
-        createdBy: 'admin'
-      }
-
-      const result = product?._id 
-        ? await updateProduct(product._id, productData)
-        : await createProduct(productData)
-
-      if (result.success) {
-        toast.success(product ? 'Product updated successfully' : 'Product created successfully')
-        onSuccess()
-        onClose()
+        workingId = product._id
       } else {
-        toast.error(result.error || 'Operation failed')
+        op = await createProduct(basePayload)
+        if (!op.success) {
+          toast.error(op.error || 'Failed to create product')
+          return
+        }
+        workingId = op.data?._id
       }
+
+      // Step 2: If an image is selected, upload it and update the product with returned URL
+      if (imageFile && workingId) {
+        setUploading(true)
+        const uploadResult = await uploadProductImage(imageFile, workingId)
+        setUploading(false)
+        if (uploadResult.success && uploadResult.url) {
+          await updateProduct(workingId, { imageUrl: uploadResult.url })
+        } else if (!uploadResult.success) {
+          toast.error(uploadResult.error || 'Failed to upload image')
+          return
+        }
+      }
+
+      toast.success(product ? 'Product updated successfully' : 'Product created successfully')
+      onSuccess()
+      onClose()
     } catch (error) {
       toast.error('An error occurred')
     }

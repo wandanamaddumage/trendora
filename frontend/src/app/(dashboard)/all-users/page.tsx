@@ -1,3 +1,4 @@
+"use client"
 
 import { useState } from 'react'
 import {Search, Eye, EyeOff, Trash2, Users} from 'lucide-react'
@@ -5,74 +6,111 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useCustomerCRUD } from '../hooks/useCustomerCRUD'
-import { useAuth } from '../hooks/useAuth'
-import { formatDate } from '../lib/utils'
+import { useUserCRUD } from '@/app/(dashboard)/hooks/useUserCRUD'
+import { 
+  useToggleUserActiveMutation,
+  useDeleteUserMutation,
+  useUpdateUserMutation,
+  useUpdatePrivilegesMutation,
+} from '@/store/api/splits/user'
+import { useAuth } from '@/app/(dashboard)/hooks/useAuth'
+import { formatDate } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
-export default function Customers() {
+export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<boolean | undefined>(undefined)
+  const [roleFilter, setRoleFilter] = useState<'admin' | 'user' | 'customer' | ''>('')
 
-  const { customers, loading, fetchCustomers, updateCustomerStatus, deleteCustomer } = useCustomerCRUD()
+  const { users, loading, fetchUsers } = useUserCRUD()
   const { hasPrivilege } = useAuth()
+  const [toggleUserActive] = useToggleUserActiveMutation()
+  const [deleteUser] = useDeleteUserMutation()
+  const [updateUser] = useUpdateUserMutation()
+  const [updatePrivileges] = useUpdatePrivilegesMutation()
 
   const handleSearch = () => {
     const filters = {
       search: searchTerm || undefined,
-      isActive: statusFilter
+      isActive: statusFilter,
+      role: roleFilter || undefined,
     }
-    fetchCustomers(filters)
+    fetchUsers(filters)
   }
 
   const handleClearFilters = () => {
     setSearchTerm('')
     setStatusFilter(undefined)
-    fetchCustomers()
+    setRoleFilter('')
+    fetchUsers()
   }
 
-  const handleToggleStatus = async (customerId: string, currentStatus: boolean) => {
-    const result = await updateCustomerStatus(customerId, !currentStatus)
-    if (result.success) {
-      toast.success(`Customer ${currentStatus ? 'deactivated' : 'activated'} successfully`)
-    } else {
-      toast.error(result.error || 'Failed to update customer status')
+  const activeUsers = users.filter((u: any) => u.isActive).length
+  const inactiveUsers = users.filter((u: any) => !u.isActive).length
+
+  const handleToggleActive = async (id: string, current: boolean) => {
+    try {
+      await toggleUserActive(Number(id)).unwrap()
+      toast.success(`User ${current ? 'deactivated' : 'activated'} successfully`)
+      fetchUsers()
+    } catch (e: any) {
+      toast.error(e?.data?.message || 'Failed to toggle user')
     }
   }
 
-  const handleDeleteCustomer = async (customerId: string, customerName: string) => {
-    if (window.confirm(`Are you sure you want to delete customer "${customerName}"?`)) {
-      const result = await deleteCustomer(customerId)
-      if (result.success) {
-        toast.success('Customer deleted successfully')
-      } else {
-        toast.error(result.error || 'Failed to delete customer')
-      }
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete user ${name}?`)) return
+    try {
+      await deleteUser(Number(id)).unwrap()
+      toast.success('User deleted')
+      fetchUsers()
+    } catch (e: any) {
+      toast.error(e?.data?.message || 'Failed to delete user')
     }
   }
 
-  const activeCustomers = customers.filter(c => c.isActive).length
-  const inactiveCustomers = customers.filter(c => !c.isActive).length
+  const handleRoleChange = async (id: string, role: 'admin' | 'user' | 'customer') => {
+    try {
+      await updateUser({ id: Number(id), role }).unwrap()
+      toast.success('Role updated')
+      fetchUsers({ role: roleFilter || undefined, isActive: statusFilter })
+    } catch (e: any) {
+      toast.error(e?.data?.message || 'Failed to update role')
+    }
+  }
+
+  const handlePrivilegeToggle = async (
+    id: string,
+    key: 'can_create_product' | 'can_update_product' | 'can_delete_product',
+    value: boolean
+  ) => {
+    try {
+      await updatePrivileges({ id: Number(id), data: { [key]: value } }).unwrap()
+      toast.success('Privileges updated')
+    } catch (e: any) {
+      toast.error(e?.data?.message || 'Failed to update privileges')
+    }
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Customers</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Users</h1>
           <p className="text-gray-600 mt-2">
-            Manage customer accounts and information
+            Manage admin and staff accounts and information
           </p>
         </div>
         
         <div className="flex items-center space-x-4 text-sm">
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-green-600" />
-            <span>Active: {activeCustomers}</span>
+            <span>Active: {activeUsers}</span>
           </div>
           <div className="flex items-center space-x-2">
             <Users className="h-4 w-4 text-red-600" />
-            <span>Inactive: {inactiveCustomers}</span>
+            <span>Inactive: {inactiveUsers}</span>
           </div>
         </div>
       </div>
@@ -82,7 +120,7 @@ export default function Customers() {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Search className="h-5 w-5" />
-            <span>Search Customers</span>
+            <span>Search Users</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -107,6 +145,17 @@ export default function Customers() {
               <option value="false">Inactive</option>
             </select>
 
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as any)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="user">Staff</option>
+              <option value="customer">Customer</option>
+            </select>
+
             <div className="flex space-x-2">
               <Button onClick={handleSearch} className="flex-1">Search</Button>
               <Button variant="outline" onClick={handleClearFilters}>Clear</Button>
@@ -118,102 +167,107 @@ export default function Customers() {
       {/* Customers Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Customer List ({customers.length})</CardTitle>
+          <CardTitle>User List ({users.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="text-center py-8">Loading customers...</div>
-          ) : customers.length === 0 ? (
+          ) : users.length === 0 ? (
             <div className="text-center py-8 text-gray-500">No customers found</div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Profile</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Contact</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Date of Birth</TableHead>
+                  <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Last Login</TableHead>
                   <TableHead>Joined</TableHead>
-                  {hasPrivilege('canManageCustomers') && <TableHead>Actions</TableHead>}
+                  {hasPrivilege('canManageUsers') && <TableHead>Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {customers.map((customer) => (
-                  <TableRow key={customer._id}>
-                    <TableCell>
-                      {customer.profileImage ? (
-                        <img 
-                          src={customer.profileImage} 
-                          alt={`${customer.firstName} ${customer.lastName}`}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-600">
-                            {customer.firstName[0]}{customer.lastName[0]}
-                          </span>
-                        </div>
-                      )}
-                    </TableCell>
+                {users.map((user: any) => (
+                  <TableRow key={user._id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{customer.firstName} {customer.lastName}</p>
+                        <p className="font-medium">{user.firstName} {user.lastName}</p>
                       </div>
                     </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>{customer.contact}</TableCell>
-                    <TableCell>
-                      <div className="max-w-xs truncate">
-                        {customer.address || '-'}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {customer.dateOfBirth ? formatDate(customer.dateOfBirth) : '-'}
-                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.contact || '-'}</TableCell>
+                    <TableCell className="capitalize">{user.role}</TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        customer.isActive 
+                        user.isActive 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {customer.isActive ? 'Active' : 'Inactive'}
+                        {user.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </TableCell>
                     <TableCell>
-                      {customer.lastLogin ? formatDate(customer.lastLogin) : 'Never'}
+                      {user.createdAt ? formatDate(user.createdAt) : '-'}
                     </TableCell>
-                    <TableCell>
-                      {customer.createdAt ? formatDate(customer.createdAt) : '-'}
-                    </TableCell>
-                    {hasPrivilege('canManageCustomers') && (
+                    {hasPrivilege('canManageUsers') && (
                       <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleToggleStatus(customer._id!, customer.isActive)}
-                            title={customer.isActive ? 'Deactivate' : 'Activate'}
-                          >
-                            {customer.isActive ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <select
+                              value={user.role}
+                              onChange={(e) => handleRoleChange(user._id, e.target.value as any)}
+                              className="flex h-8 rounded-md border border-input bg-background px-2 text-sm"
+                            >
+                              <option value="admin">Admin</option>
+                              <option value="user">Staff</option>
+                              <option value="customer">Customer</option>
+                            </select>
 
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteCustomer(customer._id!, `${customer.firstName} ${customer.lastName}`)}
-                            className="text-red-600 hover:text-red-700"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleToggleActive(user._id, user.isActive)}
+                            >
+                              {user.isActive ? 'Deactivate' : 'Activate'}
+                            </Button>
+
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(user._id, `${user.firstName} ${user.lastName}`)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+
+                          {/* Privileges */}
+                          <div className="flex items-center gap-3 text-xs">
+                            <label className="flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(user.can_create_product)}
+                                onChange={(e) => handlePrivilegeToggle(user._id, 'can_create_product', e.target.checked)}
+                              />
+                              canCreateProducts
+                            </label>
+                            <label className="flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(user.can_update_product)}
+                                onChange={(e) => handlePrivilegeToggle(user._id, 'can_update_product', e.target.checked)}
+                              />
+                              canUpdateProducts
+                            </label>
+                            <label className="flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(user.can_delete_product)}
+                                onChange={(e) => handlePrivilegeToggle(user._id, 'can_delete_product', e.target.checked)}
+                              />
+                              canDeleteProducts
+                            </label>
+                          </div>
                         </div>
                       </TableCell>
                     )}

@@ -1,3 +1,5 @@
+"use client"
+
 import { getNestedError } from "@/utils/form"
 import React, { InputHTMLAttributes, ReactNode } from "react"
 import { Controller, useFormContext } from "react-hook-form"

@@ -46,36 +46,32 @@ export const usersApi = baseApi.injectEndpoints({
     getUsers: builder.query<{ data: User[]; meta: any }, UserFilters>({
       query: (filters) => {
         const params = new URLSearchParams()
-        
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
+          if (value !== undefined && value !== null && value !== '') {
             params.append(key, value.toString())
           }
         })
-
-        return {
-          url: `${Endpoints.AdminUsers}?${params.toString()}`,
-          method: "GET",
-        }
+        const qs = params.toString()
+        const url = qs ? `${Endpoints.AdminUsers}?${qs}` : `${Endpoints.AdminUsers}`
+        return { url, method: "GET" }
       },
+      transformResponse: (response: any) => response?.data ? response : { data: response, meta: undefined },
       providesTags: ["Users"],
     }),
 
     getCustomers: builder.query<{ data: User[]; meta: any }, UserFilters>({
       query: (filters) => {
         const params = new URLSearchParams()
-        
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
+          if (value !== undefined && value !== null && value !== '') {
             params.append(key, value.toString())
           }
         })
-
-        return {
-          url: `${Endpoints.AdminCustomers}?${params.toString()}`,
-          method: "GET",
-        }
+        const qs = params.toString()
+        const url = qs ? `${Endpoints.AdminCustomers}?${qs}` : `${Endpoints.AdminCustomers}`
+        return { url, method: "GET" }
       },
+      transformResponse: (response: any) => response?.data ? response : { data: response, meta: undefined },
       providesTags: ["Customers"],
     }),
 
@@ -85,6 +81,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "POST",
         body: userData,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Users"],
     }),
 
@@ -94,6 +91,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: userData,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: (_result, _err, { id }) => [{ type: "Users", id }],
     }),
 
@@ -102,6 +100,7 @@ export const usersApi = baseApi.injectEndpoints({
         url: `${Endpoints.AdminUsers}/${id}/toggle-active`,
         method: "PATCH",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: (_result, _err, id) => [{ type: "Users", id }],
     }),
 
@@ -110,6 +109,7 @@ export const usersApi = baseApi.injectEndpoints({
         url: `${Endpoints.AdminCustomers}/${id}/toggle-active`,
         method: "PATCH",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: (_result, _err, id) => [{ type: "Customers", id }],
     }),
 
@@ -119,6 +119,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: (_result, _err, { id }) => [{ type: "Users", id }],
     }),
 
@@ -127,6 +128,7 @@ export const usersApi = baseApi.injectEndpoints({
         url: `${Endpoints.AdminUsers}/${id}`,
         method: "DELETE",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Users"],
     }),
 
@@ -135,6 +137,7 @@ export const usersApi = baseApi.injectEndpoints({
         url: `${Endpoints.AdminCustomers}/${id}`,
         method: "DELETE",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Customers"],
     }),
 

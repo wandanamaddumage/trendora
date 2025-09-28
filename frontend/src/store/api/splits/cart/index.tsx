@@ -46,6 +46,7 @@ export const cartApi = baseApi.injectEndpoints({
         url: Endpoints.Cart,
         method: "GET",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       providesTags: ["Cart"],
     }),
 
@@ -54,6 +55,7 @@ export const cartApi = baseApi.injectEndpoints({
         url: Endpoints.CartItems,
         method: "GET",
       }),
+      transformResponse: (response: any) => response?.data ?? response ?? [],
       providesTags: ["Cart"],
     }),
 
@@ -63,6 +65,7 @@ export const cartApi = baseApi.injectEndpoints({
         method: "POST",
         body: itemData,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Cart"],
     }),
 
@@ -72,6 +75,7 @@ export const cartApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Cart"],
     }),
 
@@ -80,6 +84,7 @@ export const cartApi = baseApi.injectEndpoints({
         url: `${Endpoints.CartItems}/${id}`,
         method: "DELETE",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Cart"],
     }),
 
@@ -88,6 +93,7 @@ export const cartApi = baseApi.injectEndpoints({
         url: Endpoints.Cart,
         method: "DELETE",
       }),
+      transformResponse: (response: any) => response?.data ?? response,
       invalidatesTags: ["Cart"],
     }),
   }),

@@ -33,19 +33,19 @@ export default function Sidebar({ onClose }: SidebarProps) {
     {
       icon: Package,
       label: 'Products',
-      path: '/products',
+      path: '/all-products',
       show: hasPrivilege('canAddProducts') || hasPrivilege('canUpdateProducts'),
     },
     {
       icon: Users,
       label: 'Customers',
-      path: '/customers',
+      path: '/all-customers',
       show: hasPrivilege('canManageCustomers'),
     },
     {
       icon: UserCheck,
       label: 'Users',
-      path: '/users',
+      path: '/all-users',
       show: hasPrivilege('canManageUsers'),
     },
   ]
