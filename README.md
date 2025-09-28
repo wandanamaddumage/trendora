@@ -39,7 +39,7 @@ trendora/
 - Node.js 18+
 - npm or pnpm/yarn
 - PHP 8.2+ and Composer
-- MySQL/PostgreSQL (or compatible DB)
+- MySQL
 
 ## Backend Setup (Laravel)
 1. Copy env and configure DB/app keys:
