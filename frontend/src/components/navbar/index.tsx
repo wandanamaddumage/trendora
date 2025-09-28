@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { signOut } from '@/store/slices/auth'
+import { useLogoutMutation } from '@/store/api/splits/auth'
+import { useRouter } from 'next/navigation'
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -19,9 +21,24 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const dispatch = useAppDispatch()
+  const router = useRouter()
+  const [logout] = useLogoutMutation()
 
   const totalItems = useAppSelector(state => state.cart.totalItems)
-  const { user, isAuthenticated, isAdmin } = useAppSelector(state => state.auth)
+  const { user, isAuthenticated } = useAppSelector(state => state.auth)
+  const isAdmin = user?.role === 'admin'
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap()
+      dispatch(signOut())
+      router.push('/')
+    } catch (error) {
+      // Even if logout fails on server, clear local state
+      dispatch(signOut())
+      router.push('/')
+    }
+  }
 
   const isActive = useCallback(
     (path: string) => {
@@ -50,7 +67,7 @@ export const Navbar = () => {
     <div className="relative group">
       <Button variant="ghost" className="flex items-center space-x-1 sm:space-x-2 p-1.5 sm:p-2">
         <User size={18} className="sm:w-5 sm:h-5" />
-        <span className="hidden sm:block text-sm">{user?.userName}</span>
+        <span className="hidden sm:block text-sm">{user?.first_name} {user?.last_name}</span>
       </Button>
 
       <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg transition-all duration-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible bg-white dark:bg-gray-800 z-50">
@@ -64,7 +81,7 @@ export const Navbar = () => {
 
           {isAdmin && (
             <Link
-              href="/admin"
+              href="/dashboard"
               className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               Admin Dashboard
@@ -73,7 +90,7 @@ export const Navbar = () => {
 
           <Button
             variant="ghost"
-            onClick={() => dispatch(signOut())}
+            onClick={handleLogout}
             className="w-full text-left px-4 py-2 text-sm flex items-center space-x-2"
           >
             <LogOut size={16} />
@@ -162,7 +179,7 @@ export const Navbar = () => {
                 <div className="sm:hidden px-3 py-2 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-2">
                     <User size={20} />
-                    <span className="text-sm font-medium">{user?.userName}</span>
+                    <span className="text-sm font-medium">{user?.first_name} {user?.last_name}</span>
                   </div>
                   <div className="mt-2 space-y-1">
                     <Link
@@ -174,7 +191,7 @@ export const Navbar = () => {
                     </Link>
                     {isAdmin && (
                       <Link
-                        href="/admin"
+                        href="/dashboard"
                         className="block px-2 py-1 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                         onClick={() => setIsMenuOpen(false)}
                       >
@@ -184,7 +201,7 @@ export const Navbar = () => {
                     <Button
                       variant="ghost"
                       onClick={() => {
-                        dispatch(signOut())
+                        handleLogout()
                         setIsMenuOpen(false)
                       }}
                       className="w-full text-left px-2 py-1 text-sm flex items-center space-x-2"

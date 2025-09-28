@@ -1,72 +1,110 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import { Endpoints } from "../endpoints"
+import { baseApi } from "../index"
 
 export interface CartItem {
-  id: string
-  name: string
-  brand: string
-  price: number
+  id: number
+  cart_id: number
+  product_id: number
   quantity: number
-  image?: string
+  created_at: string
+  updated_at: string
+  product: {
+    id: number
+    name: string
+    description: string
+    price: number
+    brand: string
+    category: string
+    stock_quantity: number
+    is_active: boolean
+    image_url?: string
+  }
 }
 
 export interface Cart {
+  id: number
+  customer_id: number
+  total_price: number
+  created_at: string
+  updated_at: string
   items: CartItem[]
-  totalPrice: number
 }
 
-export const cartApi = createApi({
-  reducerPath: 'cartApi',
-  baseQuery: fetchBaseQuery({
-    baseUrl: '/api/cart',
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.accessToken
-      if (token) headers.set('Authorization', `Bearer ${token}`)
-      return headers
-    },
-  }),
-  tagTypes: ['Cart'],
+export interface AddCartItemRequest {
+  product_id: number
+  quantity: number
+}
+
+export interface UpdateCartItemRequest {
+  quantity: number
+}
+
+export const cartApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getCartItems: builder.query<CartItem[], void>({
-      query: () => '/items',
-      providesTags: ['Cart'],
-    }),
-    addItem: builder.mutation<void, { productId: string; quantity: number }>({
-      query: (body) => ({
-        url: '/items',
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: ['Cart'],
-    }),
-    updateItem: builder.mutation<void, { id: string; quantity: number }>({
-      query: ({ id, quantity }) => ({
-        url: `/items/${id}`,
-        method: 'PATCH',
-        body: { quantity },
-      }),
-      invalidatesTags: ['Cart'],
-    }),
-    removeItem: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `/items/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Cart'],
-    }),
-    clearCart: builder.mutation<void, void>({
+    getCart: builder.query<Cart, void>({
       query: () => ({
-        url: '',
-        method: 'DELETE',
+        url: Endpoints.Cart,
+        method: "GET",
       }),
-      invalidatesTags: ['Cart'],
+      transformResponse: (response: any) => response?.data ?? response,
+      providesTags: ["Cart"],
+    }),
+
+    getCartItems: builder.query<CartItem[], void>({
+      query: () => ({
+        url: Endpoints.CartItems,
+        method: "GET",
+      }),
+      transformResponse: (response: any) => response?.data ?? response ?? [],
+      providesTags: ["Cart"],
+    }),
+
+    addCartItem: builder.mutation<CartItem, AddCartItemRequest>({
+      query: (itemData) => ({
+        url: Endpoints.CartItems,
+        method: "POST",
+        body: itemData,
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      invalidatesTags: ["Cart"],
+    }),
+
+    updateCartItem: builder.mutation<CartItem, { id: number; data: UpdateCartItemRequest }>({
+      query: ({ id, data }) => ({
+        url: `${Endpoints.CartItems}/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      invalidatesTags: ["Cart"],
+    }),
+
+    removeCartItem: builder.mutation<{ message: string }, number>({
+      query: (id) => ({
+        url: `${Endpoints.CartItems}/${id}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      invalidatesTags: ["Cart"],
+    }),
+
+    clearCart: builder.mutation<{ message: string }, void>({
+      query: () => ({
+        url: Endpoints.Cart,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => response?.data ?? response,
+      invalidatesTags: ["Cart"],
     }),
   }),
+  overrideExisting: false,
 })
 
 export const {
+  useGetCartQuery,
   useGetCartItemsQuery,
-  useAddItemMutation,
-  useUpdateItemMutation,
-  useRemoveItemMutation,
+  useAddCartItemMutation,
+  useUpdateCartItemMutation,
+  useRemoveCartItemMutation,
   useClearCartMutation,
 } = cartApi

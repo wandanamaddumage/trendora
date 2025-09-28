@@ -3,7 +3,7 @@
 import { Dialog } from '@headlessui/react'
 import { XMarkIcon, StarIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
-import { Product } from '../product-card'
+import type { Product } from '@/types/product'
 
 interface QuickViewProps {
   product: Product
@@ -34,21 +34,21 @@ export default function ProductQuickViewModal({ product, open, onClose }: QuickV
 
           <div className="flex flex-col md:flex-row gap-6">
             <img
-              src={product.imageUrl || 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg'}
+              src={product.image_url || 'https://images.pexels.com/photos/230544/pexels-photo-230544.jpeg'}
               alt={product.name}
               className="w-full md:w-1/2 object-cover rounded-lg"
             />
             <div className="flex-1 flex flex-col justify-between">
               <div>
                 <h2 className="text-2xl font-bold">{product.name}</h2>
-                <p className="text-xl text-gray-900 mt-2">${product.sellPrice}</p>
-                <div className="flex items-center gap-2 mt-2">{renderStars(product.rating)}</div>
+                <p className="text-xl text-gray-900 mt-2">${product.price}</p>
+                <div className="flex items-center gap-2 mt-2">{renderStars(4.5)}</div>
                 <p className="text-sm text-gray-500 mt-1">{product.category}</p>
               </div>
 
               <div className="mt-4 flex gap-2">
                 <Link
-                  href={`/products/${product._id}`}
+                  href={`/products/${product.id}`}
                   className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg text-center hover:bg-blue-700"
                 >
                   View Details

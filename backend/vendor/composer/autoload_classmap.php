@@ -173,6 +173,7 @@ return array(
     'Database\\Factories\\ProductFactory' => $baseDir . '/database/factories/ProductFactory.php',
     'Database\\Factories\\UserFactory' => $baseDir . '/database/factories/UserFactory.php',
     'Database\\Factories\\UserPrivilegeFactory' => $baseDir . '/database/factories/UserPrivilegeFactory.php',
+    'Database\\Seeders\\AdminSeeder' => $baseDir . '/database/seeders/AdminSeeder.php',
     'Database\\Seeders\\CartSeeder' => $baseDir . '/database/seeders/CartSeeder.php',
     'Database\\Seeders\\DatabaseSeeder' => $baseDir . '/database/seeders/DatabaseSeeder.php',
     'Database\\Seeders\\ProductSeeder' => $baseDir . '/database/seeders/ProductSeeder.php',

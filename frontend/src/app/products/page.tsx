@@ -21,14 +21,17 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
-  const { data: products = [], isLoading } = useGetProductsQuery({
-    searchTerm,
+  const { data: productsData, isLoading } = useGetProductsQuery({
+    search: searchTerm,
     category: selectedCategory,
     brand: selectedBrand,
-    priceRange,
+    min: priceRange.min ? Number(priceRange.min) : undefined,
+    max: priceRange.max ? Number(priceRange.max) : undefined,
     sortBy,
     sortOrder,
   })
+  
+  const products = productsData?.data || []
 
   const clearFilters = () => {
     setSearchTerm('')

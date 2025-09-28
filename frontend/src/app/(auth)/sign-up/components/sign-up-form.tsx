@@ -7,14 +7,18 @@ import toast from "react-hot-toast"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff } from "lucide-react"
+import { useAppDispatch } from '@/store/hooks'
+import { setCredentials } from '@/store/slices/auth'
+import { useRegisterMutation } from '@/store/api/splits/auth'
 
 import InputText from "@/components/input-fields/input-text"
 import { SignupFormValues, signupSchema } from "./schema"
 
 const SignupForm = () => {
   const router = useRouter()
+  const dispatch = useAppDispatch()
   const [showPassword, setShowPassword] = useState(false)
-  const [isSigningUp, setIsSigningUp] = useState(false)
+  const [register, { isLoading: isSigningUp }] = useRegisterMutation()
 
   const methods = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -31,16 +35,22 @@ const SignupForm = () => {
   const { handleSubmit, reset } = methods
 
   const onSubmit = async (data: SignupFormValues) => {
-    setIsSigningUp(true)
     try {
-      // TODO: Call your signup API here
+      const result = await register({
+        first_name: data.fname,
+        last_name: data.lname,
+        email: data.email,
+        contact: data.contact,
+        password: data.password,
+        password_confirmation: data.confirmPassword,
+      }).unwrap()
+      
+      dispatch(setCredentials({ user: result.user, token: result.token }))
       toast.success("Account created successfully!")
-      router.push("/login") // redirect to login after signup
+      router.push("/")
       reset()
-    } catch {
-      toast.error("Signup failed. Please try again.")
-    } finally {
-      setIsSigningUp(false)
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Signup failed. Please try again.")
     }
   }
 
