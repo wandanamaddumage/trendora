@@ -119,7 +119,7 @@ trendora/
 - ![Add Product](docs/images/add-product.png)
 
 - ![Cart](docs/images/cart.png)
-- ![Profile](docs/images/profile.png.png)
+- ![Profile](docs/images/profile.png)
 - ![Sign In](docs/images/sign-in.png)
 - ![Sign Up](docs/images/sign-up.png)
 - ![Dark Mood](docs/images/dark-mood.png)
